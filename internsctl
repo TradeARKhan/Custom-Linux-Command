@@ -1,0 +1,98 @@
+#!/bin/bash
+
+#internsctl
+#v0.1.0
+
+#set BASH to quit Script on errors
+
+set -e
+
+#Functions
+
+internsctl-help() {
+
+cat << _EOF_
+
+      Internsctl is a alternative tool for custom uses. It is based on Debian and Ubuntu based Linux OS.
+
+      Commands:
+
+        internsctl = Running "internsctl" with no flags will show the manual page to the user.
+
+        internsctl --help = Shows this Help page.
+
+        internsctl --version = Shows the version of the tool.
+
+	internsctl cpu getinfo = Shows the information about the CPU.
+
+	internsctl memory info = Shows the information about the RAM.
+
+	internsctl user create <username> = Creates a new user on the system who can login to the system.
+
+	internsctl user list = Lists all the user present in the system.
+
+	internsctl user list --sudo-only = Lists all the user with 'sudo' permission.
+
+	internsctl file getinfo <filename> = Shows information about a file. 
+
+	internsctl file getinfo [options] <filename>
+
+		Options:
+
+			--size, -s         = Shows size of the file.
+			--permissions, -p  = Shows the permission details of the file.
+			--owner, o         = Shows the Owner of the file.
+			--last-modified, m = Shows the Timestamp of last modification
+
+_EOF_
+
+}
+
+version() {
+	echo "v0.1.0"
+}
+
+cpu() {
+        echo "CPU DETAILS:"
+        lscpu
+}
+
+ram() {
+	echo "MEMORY DETAILS:"
+	free -h
+}
+
+
+
+
+
+#Execution
+
+echo "Internsctl : Custom Tool for Information of system resources (Version 0.1.0)"
+
+if [ "$1" == "--help" ]; then
+        internsctl-help
+	exit
+fi
+
+if [ "$1" == "--version" ]; then
+	version
+	exit
+fi
+
+if [ "$1" == "cpu" ] && [ "$2" ==  "getinfo" ]; then
+        cpu
+        exit
+fi
+
+if [ "$1" == "memory" ] && [ "$2"  == "getinfo" ]; then
+	ram
+	exit
+fi
+
+if [ -n "$1" ]; then
+        echo "internsctl Error: Invalid argument. Try 'internsctl --help' for more info." >&2
+        exit1
+fi
+
+internsctl-help
