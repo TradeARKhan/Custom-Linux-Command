@@ -1,0 +1,54 @@
+.\" Manpage for internsctl.
+
+.TH man 1  "internsctl man page" 19-02-2021 
+.SH NAME 
+internsctl \- Custom Command for specific use cases.
+.SH SYNOPSIS
+.B internsctl [OPTIONS]... [FILE]...
+.SH DESCRIPTION
+.B Internsctl is a alternative tool for custom uses. It is based on Debian and Ubuntu based Linux OS.
+.TP
+.B OPTIONS:
+.TP
+internsctl =
+Running "internsctl" with no flags will show the manual page to the user.
+.TP
+internsctl --help = 
+Shows this Help page.
+.TP
+internsctl --version = 
+Shows the version of the tool.
+.TP
+internsctl cpu getinfo = 
+Shows the information about the CPU.
+.TP
+internsctl memory info = 
+Shows the information about the RAM.
+.TP
+internsctl user create <username> = 
+Creates a new user on the system who can login to the system.
+.TP
+internsctl user list = 
+Lists all the user present in the system.
+.TP	
+internsctl user list --sudo-only = 
+Lists all the user with 'sudo' permission.
+.TP
+internsctl file getinfo <filename> = 
+Shows information about a file. 
+.TP
+internsctl file getinfo [options] <filename>
+
+.B Flags:
+
+                --size, -s          = Shows size of the file.
+                --permissions, -p   = Shows the permission details of the file.
+                --owner, -o         = Shows the Owner of the file.
+                --last-modified, -m = Shows the Timestamp of last modification
+
+.SH BUGS
+No Known Bugs
+.SH AUTHOR
+ARK@Xenonstack
+.SH SEE ALSO
+External links: 
