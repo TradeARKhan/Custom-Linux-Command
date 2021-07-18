@@ -7,92 +7,163 @@
 
 set -e
 
-#Functions
+#Help Doc
 
 internsctl-help() {
 
 cat << _EOF_
 
-      Internsctl is a alternative tool for custom uses. It is based on Debian and Ubuntu based Linux OS.
+      Internsctl is a alternative tool with specific uses. It is based on Debian and Ubuntu based Linux OS.
 
-      Commands:
+      COMMANDS:
 
         internsctl = Running "internsctl" with no flags will show the manual page to the user.
 
-        internsctl --help = Shows this Help page.
+        internsctl --help	      	       = Shows this Help page.
 
-        internsctl --version = Shows the version of the tool.
+        internsctl --version	 	       = Shows the version of the tool.
 
-	internsctl cpu getinfo = Shows the information about the CPU.
+	internsctl cpu getinfo 	 	       = Shows the information about the CPU.
 
-	internsctl memory info = Shows the information about the RAM.
+	internsctl memory getinfo 	       = Shows the information about the RAM.
 
-	internsctl user create <username> = Creates a new user on the system who can login to the system.
+	internsctl user create <username>      = Creates a new user on the system who can login to the system.
 
-	internsctl user list = Lists all the user present in the system.
+	internsctl user list 		       = Lists all the user present in the system.
 
-	internsctl user list --sudo-only = Lists all the user with 'sudo' permission.
+	internsctl user list --sudo-only       = Lists all the user with 'sudo' permission.
 
-	internsctl file getinfo <filename> = Shows information about a file. 
+	internsctl file getinfo <filename>     = Shows information about a file. 
 
-	internsctl file getinfo [options] <filename>
+	internsctl file getinfo [OPTIONS] <filename>
+			OPTIONS:
 
-		Options:
-
-			--size, -s         = Shows size of the file.
-			--permissions, -p  = Shows the permission details of the file.
-			--owner, o         = Shows the Owner of the file.
-			--last-modified, m = Shows the Timestamp of last modification
+			--size, -s          =   Shows size of the file.
+			--permissions, -p   =   Shows the permission details of the file.
+			--owner, -o         =   Shows the Owner of the file.
+			--last-modified, -m =   Shows the Timestamp of last modification
 
 _EOF_
 
 }
 
+if [ "$1" == "--help" ]; then
+        internsctl-help
+        exit
+fi
+
+#Getting the version
+
 version() {
 	echo "v0.1.0"
 }
 
-cpu() {
-        echo "CPU DETAILS:"
-        lscpu
-}
-
-ram() {
-	echo "MEMORY DETAILS:"
-	free -h
-}
-
-
-
-
-
-#Execution
-
-echo "Internsctl : Custom Tool for Information of system resources (Version 0.1.0)"
-
-if [ "$1" == "--help" ]; then
-        internsctl-help
-	exit
-fi
-
 if [ "$1" == "--version" ]; then
-	version
-	exit
-fi
-
-if [ "$1" == "cpu" ] && [ "$2" ==  "getinfo" ]; then
-        cpu
+        version
         exit
 fi
 
+#Getting the CPU details
+
+cpu() {
+        echo "CPU DETAILS:"
+        lscpu 
+}
+
+if [ "$1" == "cpu" ] && [ "$2" ==  "getinfo" ]; then
+        echo "$(cpu | head -n 24)"
+        exit
+fi
+
+#Getting the memory details
+
+ram() {
+	echo "MEMORY DETAILS:"
+	free 
+}
+
 if [ "$1" == "memory" ] && [ "$2"  == "getinfo" ]; then
-	ram
+        ram
+        exit
+fi
+
+
+#ADD NEW USER
+
+if [ "$1" == "user" ] && [ "$2" == "create" ]; then
+	echo "$3" > /dev/null 2>&1
+	adduser --home /$3 $3
 	exit
 fi
 
+#LIST USERS
+
+user-list() {
+	 compgen -u
+}
+
+sudo-user() {
+	getent group sudo | awk -F: '{print $4}'
+}
+
+if [ "$1" == "user" ] && [ "$2" == "list" ]; then
+	while [ "$3" == "--sudo-only" ]
+	do
+		sudo-user
+		exit 
+	done
+	user-list
+	exit
+fi
+
+#Getting a file information
+
+if [ "$1" == "file" ] && [ "$2" == "getinfo" ]; then
+	while [ "$3" == "--size" ] || [ "$3" == "-s" ]
+        do 
+		echo "$4" > /dev/null 2>&1
+                echo "$(ls -l $4 | cut -d " " -f5)"
+                exit
+        done
+
+	while [ "$3" == "--permissions" ] || [ "$3" == "-p" ]
+        do 
+                echo "$4" > /dev/null 2>&1
+                echo "$(ls -l $4 | cut -d " " -f1)"
+                exit
+        done
+
+	while [ "$3" == "--owner" ] || [ "$3" == "-o" ]
+        do 
+                echo "$4" > /dev/null 2>&1
+                echo "$(ls -l $4 | cut -d " " -f3)"
+                exit
+        done
+
+	while [ "$3" == "--last-modified" ] || [ "$3" == "-m" ]
+        do 
+                echo "$4" > /dev/null 2>&1
+                echo "$(stat $4 | sed -n '6 p' | cut -d " " -f 2,3,4)"
+                exit
+        done
+
+	echo "$3" > /dev/null 2>&1
+	echo -e "\tFile:\t $(ls -l $3 | cut -d " " -f 9)"
+        echo -e "\tAccess:\t $(ls -l $3 | cut -d " " -f 1)"
+        echo -e "\tSize(B): $(ls -l $3 | cut -d " " -f 5 )"
+        echo -e "\tOwner:\t $(ls -l $3 | cut -d " " -f 3)"
+        echo -e "\tModify:\t $(stat $3 | sed -n '6 p' | cut -d " " -f 2,3,4)"
+
+exit
+fi
+
+#Exception
+
+echo "Internsctl : Custom Tool for Information of system resources (Version 0.1.0)"
+
 if [ -n "$1" ]; then
-        echo "internsctl Error: Invalid argument. Try 'internsctl --help' for more info." >&2
-        exit1
+        echo "Error: Invalid argument. Try 'internsctl --help' for more info." >&2
+        exit 1
 fi
 
 internsctl-help
